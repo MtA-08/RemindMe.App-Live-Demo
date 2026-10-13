@@ -276,6 +276,54 @@ button:focus-visible {
     font-weight: 500;
 }
 
+/* --- EINSTELLUNGEN --- */
+.settings-options-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+}
+
+.settings-option-card {
+    background-color: #1c1c1e;
+    border: 1px solid #2c2c2e;
+    border-radius: 12px;
+    box-sizing: border-box;
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    cursor: pointer;
+    transition: transform 0.1s ease, opacity 0.2s ease;
+}
+
+    .settings-option-card:hover {
+        transform: scale(1.005);
+    }
+
+    .settings-option-card:active {
+        transform: scale(1);
+    }
+
+.settings-option-info {
+    flex-grow: 1;
+    overflow: hidden;
+    margin-right: 16px;
+}
+
+.settings-option-title {
+    font-size: 1.05rem;
+    font-weight: 500;
+    color: #FFFFFF;
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.settings-options-picture {
+}
+
 /* Erinnerungs-Karten & Day Picker */
 .set-reminder-card {
     background-color: #2c2c2e;
