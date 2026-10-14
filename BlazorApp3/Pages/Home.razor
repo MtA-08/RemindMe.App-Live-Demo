@@ -3,11 +3,6 @@
 @layout MainLayout
 @inject TaskStorageService TaskStorage
 @inject NavigationManager Navigation
-@inject IStringLocalizer<RemindMe> Localizer
-@inject IJSRuntime JS
-
-@using System.Globalization
-
 
 <PageTitle>Homepage</PageTitle>
 
@@ -48,67 +43,18 @@
     <!-- BOTTOM SHEET: EINSTELLUNGEN -->
     @if (isSettingsMenuVisible)
     {
-        <div class="sheet-overlay @(isSettingsMenuClosing ? "closing" : "")"></div>
-        <div class="bottom-sheet @(isSettingsMenuClosing ? "closing" : "")">
+        <div class="sheet-overlay @(isTaskModalClosing ? "closing" : "")" @onclick="() => isSettingsMenuVisible = !isSettingsMenuVisible"></div>
+        <div class="bottom-sheet @(isTaskModalClosing ? "closing" : "")">
 
             <div class="sheet-header">
-                <h3>@Localizer["SettingsMenuName"]</h3>
-                <button class="close-btn" @onclick="CloseSettingsMenuAsync">
+                <h3>Einstellungen</h3>
+                <button class="close-btn" @onclick="() => isSettingsMenuVisible = !isSettingsMenuVisible">
                     <img src="x.svg" alt="Schließen" />
                 </button>
             </div>
 
             <div class="sheet-content">
-                <div class="settings-options-list">
-                    <div class="settings-option-card" @onclick="() => isLanguageSettingsMenuVisible = !isLanguageSettingsMenuVisible">
-                        <div class="settings-option-info">
-                            <p class="settings-option-title">@Localizer["SettingsMenuSettingLanguage"]</p>
-                        </div>
-                        <img src="chevron-right.svg" />
-                    </div>
-
-                    <div class="settings-option-card">
-                        <div class="settings-option-info">
-                            <p class="settings-option-title">@Localizer["SettingsMenuSettingDesign"]</p>
-                        </div>
-                        <img src="chevron-right.svg" />
-                    </div>
-                </div>
-            </div>
-        </div>
-    }
-
-    <!-- BOTTOM SHEET: EINSTELLUNGEN-Sprache -->
-    @if (isLanguageSettingsMenuVisible)
-    {
-        <div class="sheet-overlay @(isLanguageSettingsMenuClosing ? "closing" : "")"></div>
-        <div class="bottom-sheet @(isLanguageSettingsMenuClosing ? "closing" : "")">
-
-            <div class="sheet-header">
-                <h3>@Localizer["SettingsMenuSettingLanguage"]</h3>
-                <button class="close-btn" @onclick="CloseLanguageSettingsMenuAsync">
-                    <img src="x.svg" alt="Schließen" />
-                </button>
-            </div>
-
-            <div class="sheet-content">
-                <div class="settings-options-list">
-                    <div class="settings-option-card" @onclick='() => ChangeLanguage("de-DE")'>
-                        <div class="settings-option-info">
-                            <p class="settings-option-title">Deutsch</p>
-                        </div>
-                    </div>
-                    <div class="settings-option-card" @onclick='() => ChangeLanguage("en-US")'>
-                        <div class="settings-option-info">
-                            <p class="settings-option-title">English</p>
-                        </div>
-                    </div>
-                    <div class="settings-option-card" @onclick='() => ChangeLanguage("tr-TR")'>
-                        <div class="settings-option-info">
-                            <p class="settings-option-title">Türkçe</p>
-                        </div>
-                    </div>
-                </div>
+                
             </div>
         </div>
     }
@@ -116,11 +62,11 @@
     <!-- BOTTOM SHEET: TASK ERSTELLEN -->
     @if (isModalVisible)
     {
-        <div class="sheet-overlay @(isTaskModalClosing ? "closing" : "")"></div>
+        <div class="sheet-overlay @(isTaskModalClosing ? "closing" : "")" @onclick="HideModalAsync"></div>
         <div class="bottom-sheet @(isTaskModalClosing ? "closing" : "")">
 
             <div class="sheet-header">
-                <h3>@Localizer["TaskPopupName"]</h3>
+                <h3>Neues ToDo erstellen</h3>
                 <button class="close-btn" @onclick="HideModalAsync">
                     <img src="x.svg" alt="Schließen" />
                 </button>
@@ -128,23 +74,23 @@
 
             <div class="sheet-content">
                 <div class="input-group">
-                    <label>@Localizer["TaskNameInputLabel"]</label>
-                    <input type="text" @bind="newTask.Name" maxlength="@MaxTaskNameLength" class="text-input-field" placeholder="@Localizer["TaskNameInputPlaceholder"]" />
+                    <label>NAME</label>
+                    <input type="text" @bind="newTask.Name" maxlength="@MaxTaskNameLength" class="text-input-field" placeholder="Task Name..." />
                 </div>
 
                 <div class="input-group">
-                    <label>@Localizer["TaskDescriptionInputLabel"]</label>
-                    <textarea @bind="newTask.Description" class="text-input-field textarea-field" placeholder=@Localizer["TaskDescriptionInputPlaceholder"]></textarea>
+                    <label>BESCHREIBUNG</label>
+                    <textarea @bind="newTask.Description" class="text-input-field textarea-field" placeholder="Beschreibung (optional)..."></textarea>
                 </div>
 
                 <div class="input-group">
-                    <label>@Localizer["TaskReminderInputLabel"]</label>
+                    <label>ERINNERUNGEN</label>
                     <div class="select-menu-card" @onclick="ToggleReminderMenuAsync">
                         <div class="select-menu-left">
                             <img src="clock.svg" />
-                            <span>@(newTask.Reminders.Count > 0 ? $"{newTask.Reminders.Count} {Localizer["TaskReminderInputPlaceholderMultipleReminders"]}" : Localizer["TaskReminderInputPlaceholderNoReminder"])</span>
+                            <span>@(newTask.Reminders.Count > 0 ? $"{newTask.Reminders.Count} Erinnerung(en) aktiv" : "Keine Erinnerung")</span>
                         </div>
-                        <span class="action-link">@Localizer["TaskReminderInputAddButton"]</span>
+                        <span class="action-link">Hinzufügen</span>
                     </div>
                 </div>
             </div>
@@ -152,7 +98,7 @@
             <div class="sheet-footer">
                 <button class="save-btn-full" @onclick="SaveTaskAsync">
                     <img src="check.svg" alt="Erstellen" />
-                    <span>@Localizer["TaskCreateTaskButton"]</span>
+                    <span>Task erstellen</span>
                 </button>
             </div>
         </div>
@@ -165,32 +111,35 @@
         <div class="bottom-sheet @(isReminderModalClosing ? "closing" : "")">
 
             <div class="sheet-header">
-                <h3>@Localizer["TaskAddReminderPopupName"]</h3>
+                <h3>Erinnerungen erstellen</h3>
                 <button class="close-btn" @onclick="ToggleReminderMenuAsync">
                     <img src="x.svg" alt="Schließen" />
                 </button>
             </div>
 
             <div class="sheet-content">
-                @if (notificationsEnabled)
-                {
+                
                     @foreach (var reminder in newTask.Reminders)
                     {
                         <div class="set-reminder-card">
                             <div class="reminder-menu-day-picker">
-                                <button class="day-chip @(IsSingleDateSelected(reminder, DateOnly.FromDateTime(DateTime.Today))
-                                                                                                ? "selected" : "")" @onclick="() => SetSingleReminderDate(reminder, DateOnly.FromDateTime(DateTime.Today))">
-                                    @Localizer["TaskAddReminderReminderMenuToday"]
+                                <button class="day-chip @(IsSingleDateSelected(reminder,DateOnly.FromDateTime(DateTime.Today))
+                                                            ? "selected" : "")" @onclick="() => SetSingleReminderDate(reminder,DateOnly.FromDateTime(DateTime.Today))">
+                                Heute
                                 </button>
-                                <button class="day-chip @(IsSingleDateSelected(reminder, DateOnly.FromDateTime(DateTime.Today.AddDays(1)))
-                                                                                    ? "selected"
-                                                                                    : "")"
-                                        @onclick="() => SetSingleReminderDate(reminder, DateOnly.FromDateTime(DateTime.Today.AddDays(1)))">
-                                    @Localizer["TaskAddReminderReminderMenuTomorrow"]
+                                <button class="day-chip @(IsSingleDateSelected(
+                                                reminder,
+                                                DateOnly.FromDateTime(DateTime.Today.AddDays(1)))
+                                                ? "selected"
+                                                : "")"
+                                        @onclick="() => SetSingleReminderDate(
+                                                reminder,
+                                                DateOnly.FromDateTime(DateTime.Today.AddDays(1)))">
+                                Morgen
                                 </button>
-                                <button class="day-chip @(IsCustomDateSelection(reminder) ? "selected" : "")"
-                                        @onclick="() => OpenDaySelection(reminder)">
-                                    @Localizer["TaskAddReminderReminderMenuPickDay"]
+                                <button class="day-chip @(IsCustomDateSelection(reminder)? "selected": "")"
+                                                        @onclick="() => OpenDaySelection(reminder)">
+                                    Tag wählen
                                 </button>
                             </div>
                             <div class="reminder-card-footer">
@@ -207,33 +156,48 @@
 
                     <button class="add-reminder-btn" @onclick="AddNewReminder">
                         <img src="plus.svg" width="18" alt="Plus" />
-                        <span>@Localizer["TaskAddReminderAddReminderButton"]</span>
+                        <span>Erinnerung hinzufügen</span>
                     </button>
-                }
-                else
-                {
-                    <div class="notification-permission-card">
-                        <p>Benachrichtigungen sind zurzeit deaktiviert.</p>
-                        <button class="ask-permission-button" @onclick="RequestNotificationPermission">
-                            Benachrichtigungen erlauben
-                        </button>
-                    </div>
-                }
             </div>
 
             <div class="sheet-footer">
                 <button class="save-btn-full" @onclick="ToggleReminderMenuAsync">
                     <img src="check.svg" alt="Fertig" />
-                    <span>@Localizer["TaskAddReminderDoneButton"]</span>
+                    <span>Fertig</span>
                 </button>
             </div>
         </div>
     }
 
+    <!-- BOTTOM SHEET: ZEITWÄHLER -->
+    @*@if (selectedReminder != null)
+    {
+        <div class="sheet-overlay @(isTimePickerClosing ? "closing" : "")" @onclick="CloseTimePickerAsync"></div>
+        <div class="bottom-sheet compact-sheet @(isTimePickerClosing ? "closing" : "")">
+
+            <div class="sheet-header">
+                <h3>Uhrzeit auswählen</h3>
+                <button class="close-btn" @onclick="CloseTimePickerAsync">
+                    <img src="x.svg" alt="Schließen" />
+                </button>
+            </div>
+
+            <div class="sheet-content center-content">
+                <input type="time" class="time-picker-input" @bind="TempTime" />
+            </div>
+
+            <div class="sheet-footer">
+                <button class="save-btn-full" @onclick="SaveTimeAsync">
+                    <span>Uhrzeit übernehmen</span>
+                </button>
+            </div>
+        </div>
+    }*@
+
     <!-- BOTTOM SHEET: TAGE AUSWÄHLEN -->
     @if (daySelectionReminder != null)
     {
-        <div class="sheet-overlay @(isDaySelectionClosing ? "closing" : "")"></div>
+        <div class="sheet-overlay @(isDaySelectionClosing ? "closing" : "")" @onclick="CloseDaySelectionAsync"></div>
         <div class="bottom-sheet @(isDaySelectionClosing ? "closing" : "")">
 
             <div class="sheet-header">
@@ -245,7 +209,7 @@
 
             <div class="sheet-content">
                 <!-- Kalender Kopfzeile (Monatsnavigation) -->
-                <div class="calendar-header">
+                <div class="calendar-header" >
                     <button class="round-btn btn-back" @onclick="PrevMonth"><img src="chevron-left.svg" /></button>
                     <h4 style="margin: 0;">@calendarDisplayDate.ToString("MMMM yyyy")</h4>
                     <button class="round-btn btn-back" @onclick="NextMonth"><img src="chevron-right.svg" /></button>
@@ -306,8 +270,6 @@
     private bool isReminderMenuVisible = false;
     private bool isSettingsMenuVisible = false;
 
-    private bool isLanguageSettingsMenuVisible = false;
-
     private Reminder? selectedReminder;
     private TimeOnly TempTime;
     private bool notificationsEnabled = false;
@@ -318,9 +280,6 @@
     private bool isTaskModalClosing = false;
     private bool isReminderModalClosing = false;
     private bool isTimePickerClosing = false;
-    private bool isSettingsMenuClosing = false;
-    private bool isLanguageSettingsMenuClosing = false;
-
 
 
 
@@ -360,7 +319,7 @@
 
     private void OpenTaskDetail(string taskId)
     {
-        Navigation.NavigateTo($"/task/{taskId}");
+        Navigation.NavigateTo($"task/{taskId}");
     }
 
     // ==========================================
@@ -382,6 +341,7 @@
 
         tasks.Add(createdTask);
 
+        await ScheduleNotificationsForTaskAsync(createdTask);
         await TaskStorage.SaveTasksAsync(tasks);
 
         await HideModalAsync();
@@ -391,6 +351,7 @@
     private async Task ToggleTaskCompletionAsync(TodoTask task)
     {
         task.IsCompleted = !task.IsCompleted;
+        await ScheduleNotificationsForTaskAsync(task);
         await TaskStorage.SaveTasksAsync(tasks);
     }
 
@@ -471,6 +432,38 @@
         StateHasChanged();
     }
 
+    private async Task ScheduleNotificationsForTaskAsync(TodoTask task)
+    {
+        if (task.NotificationIds.Any())
+        {
+
+            task.NotificationIds.Clear();
+        }
+
+        if (task.IsCompleted || !notificationsEnabled)
+        {
+            return;
+        }
+
+        foreach (Reminder reminder in task.Reminders)
+        {
+            foreach (DateOnly date in reminder.Dates)
+            {
+                DateTime notifyTime = date.ToDateTime(reminder.Time);
+
+                // Keine Benachrichtigung mehr für vergangene Termine.
+                if (notifyTime <= DateTime.Now)
+                {
+                    continue;
+                }
+
+                int notificationId = CreateUniqueNotificationId();
+
+                task.NotificationIds.Add(notificationId);
+            }
+        }
+    }
+
     private int CreateUniqueNotificationId()
     {
         var usedIds = tasks
@@ -513,7 +506,7 @@
         return dayOfWeek == 0 ? 6 : dayOfWeek - 1;
     }
 
-    private bool IsSingleDateSelected(Reminder reminder, DateOnly date)
+    private bool IsSingleDateSelected(Reminder reminder,DateOnly date)
     {
         return reminder.Dates.Count == 1 && reminder.Dates.Contains(date);
     }
@@ -569,45 +562,11 @@
         isDaySelectionClosing = true;
         StateHasChanged();
 
-        await Task.Delay(SheetAnimationDurationMs);
+        await Task.Delay(250);
 
         daySelectionReminder = null;
         selectedDatesDraft.Clear();
 
         isDaySelectionClosing = false;
-    }
-
-    private async Task ChangeLanguage(string language)
-    {
-        if (!string.IsNullOrEmpty(language))
-        {
-            // Save selection to browser Local Storage
-            await JS.InvokeVoidAsync("localStorage.setItem", "selected_language", language);
-
-            // Hard reload the application to apply the new culture thread configuration in Program.cs
-            Navigation.NavigateTo(Navigation.Uri, forceLoad: true);
-        }
-    }
-
-    private async Task CloseSettingsMenuAsync()
-    {
-        isSettingsMenuClosing = true;
-        StateHasChanged();
-
-        await Task.Delay(SheetAnimationDurationMs);
-        isSettingsMenuVisible = false;
-
-        isSettingsMenuClosing = false;
-    }
-
-    private async Task CloseLanguageSettingsMenuAsync()
-    {
-        isLanguageSettingsMenuClosing = true;
-        StateHasChanged();
-
-        await Task.Delay(SheetAnimationDurationMs);
-        isLanguageSettingsMenuVisible = false;
-
-        isLanguageSettingsMenuClosing = false;
     }
 }

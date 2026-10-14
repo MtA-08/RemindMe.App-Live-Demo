@@ -3,9 +3,6 @@
 @layout MainLayout
 @inject TaskStorageService TaskStorage
 @inject NavigationManager Navigation
-@inject IStringLocalizer<RemindMe> Localizer
-
-@using System.Globalization
 
 <div class="task-detail-page">
     @if (isLoading)
@@ -30,7 +27,7 @@
 
             <div class="right-actions">
                 <button class="round-btn btn-edit" @onclick="OpenEditModal" title="Bearbeiten">
-                    <img src="edit.svg" />
+                   <img src="edit.svg" />
                 </button>
                 <button class="round-btn btn-delete" @onclick="DeleteTaskAsync" title="Löschen">
                     <img src="red-trash.svg" />
@@ -41,19 +38,19 @@
         <!-- DETAILIERTE ANSICHT-MODUS -->
         <div class="detail-body">
             <div class="detail-block">
-                <span class="field-label">@Localizer["TaskNameInputLabel"]</span>
+                <span class="field-label">NAME</span>
                 <h1 class="field-value task-title">@task.Name</h1>
             </div>
 
             <div class="detail-block">
-                <span class="field-label">@Localizer["TaskDescriptionInputLabel"]</span>
+                <span class="field-label">BESCHREIBUNG</span>
                 <p class="field-value description-text">
-                    @(string.IsNullOrWhiteSpace(task.Description) ? Localizer["TaskDetailViewNoDescriptionPlaceholder"] : task.Description)
+                    @(string.IsNullOrWhiteSpace(task.Description) ? "Keine Beschreibung vorhanden." : task.Description)
                 </p>
             </div>
 
             <div class="detail-block">
-                <span class="field-label">@Localizer["TaskReminderInputLabel"]</span>
+                <span class="field-label">ERINNERUNGEN</span>
                 @if (task.Reminders != null && task.Reminders.Any())
                 {
                     <div class="reminders-list">
@@ -73,7 +70,7 @@
                 }
                 else
                 {
-                    <p class="field-value empty-text">@Localizer["TaskReminderInputPlaceholderNoReminder"]</p>
+                    <p class="field-value empty-text">Keine Erinnerungen.</p>
                 }
             </div>
         </div>
@@ -85,7 +82,7 @@
             <div class="bottom-sheet @(isClosing ? "closing" : "")">
 
                 <div class="sheet-header">
-                    <h3>@Localizer["TaskEditPopupName"]</h3>
+                    <h3>Task bearbeiten</h3>
                     <button class="close-btn" @onclick="CloseEditModalAsync">
                         <img src="x.svg" alt="Schließen" />
                     </button>
@@ -93,23 +90,23 @@
 
                 <div class="sheet-content">
                     <div class="input-group">
-                        <label>@Localizer["TaskNameInputLabel"]</label>
-                        <input type="text" @bind="editTask.Name" maxlength="@MaxTaskNameLength" class="text-input-field" placeholder="@Localizer["TaskNameInputPlaceholder"]">
+                        <label>NAME</label>
+                        <input type="text" @bind="editTask.Name" maxlength="@MaxTaskNameLength" class="text-input-field" placeholder="Task Name...">
                     </div>
 
                     <div class="input-group">
-                        <label>@Localizer["TaskDescriptionInputLabel"]</label>
-                        <textarea @bind="editTask.Description" class="text-input-field textarea-field" placeholder="@Localizer["TaskDescriptionInputPlaceholder"]"></textarea>
+                        <label>BESCHREIBUNG</label>
+                        <textarea @bind="editTask.Description" class="text-input-field textarea-field" placeholder="Beschreibung (optional)..."></textarea>
                     </div>
 
                     <div class="input-group">
-                        <label>@Localizer["TaskReminderInputLabel"]</label>
+                        <label>ERINNERUNGEN</label>
                         <div class="select-menu-card" @onclick="ToggleReminderMenu">
                             <div class="select-menu-left">
                                 <img src="clock.svg" alt="Clock" width="18" />
-                                <span>@(editTask.Reminders.Count > 0 ? $"{editTask.Reminders.Count} {Localizer["TaskReminderInputPlaceholderMultipleReminders"]}" : @Localizer["TaskReminderInputPlaceholderNoReminder"])</span>
+                                <span>@(editTask.Reminders.Count > 0 ? $"{editTask.Reminders.Count} Erinnerung(en) aktiv" : "Keine Erinnerung")</span>
                             </div>
-                            <span class="action-link"></span>
+                            <span class="action-link">Konfigurieren</span>
                         </div>
                     </div>
                 </div>
@@ -117,7 +114,7 @@
                 <div class="sheet-footer">
                     <button class="save-btn-full" @onclick="SaveEditAsync">
                         <img src="check.svg" alt="Speichern" />
-                        <span>@Localizer["TaskEditSaveChanges"]</span>
+                        <span>Änderungen speichern</span>
                     </button>
                 </div>
             </div>
@@ -126,43 +123,37 @@
         <!-- BOTTOM SHEET: ERINNERUNGEN -->
         @if (isReminderMenuVisible)
         {
-            <div class="sheet-overlay @(isReminderModalClosing ? "closing" : "")" @onclick="ToggleReminderMenuAsync"></div>
-            <div class="bottom-sheet @(isReminderModalClosing ? "closing" : "")">
+            <div class="sheet-overlay @(isClosing ? "closing" : "")" @onclick="ToggleReminderMenuAsync"></div>
+            <div class="bottom-sheet @(isClosing ? "closing" : "")">
 
                 <div class="sheet-header">
-                    <h3>@Localizer["TaskAddReminderPopupName"]</h3>
+                    <h3>Erinnerungen verwalten</h3>
                     <button class="close-btn" @onclick="ToggleReminderMenuAsync">
                         <img src="x.svg" alt="Schließen" />
                     </button>
                 </div>
 
                 <div class="sheet-content">
+                    @if (notificationsEnabled)
+                    {
                         @foreach (var reminder in editTask.Reminders)
                         {
                             <div class="set-reminder-card">
                                 <div class="reminder-menu-day-picker">
-                                    <button class="day-chip @(IsSingleDateSelected(reminder, DateOnly.FromDateTime(DateTime.Today))
-                                                                                                                                            ? "selected" : "")" @onclick="() => SetSingleReminderDate(reminder, DateOnly.FromDateTime(DateTime.Today))">
-                                        @Localizer["TaskAddReminderReminderMenuToday"]
+
+                                    <button class="day-chip @(IsSingleDateSelected(reminder,DateOnly.FromDateTime(DateTime.Today))? "selected" : "")"
+                                            @onclick="() => SetSingleReminderDate(reminder,DateOnly.FromDateTime(DateTime.Today))">
+                                    Heute
                                     </button>
-                                    <button class="day-chip @(IsSingleDateSelected(reminder, DateOnly.FromDateTime(DateTime.Today.AddDays(1)))
-                                                                                                                                ? "selected"
-                                                                                                                                : "")"
-                                            @onclick="() => SetSingleReminderDate(reminder, DateOnly.FromDateTime(DateTime.Today.AddDays(1)))">
-                                        @Localizer["TaskAddReminderReminderMenuTomorrow"]
+
+                                    <button class="day-chip @(IsSingleDateSelected(reminder,DateOnly.FromDateTime(DateTime.Today.AddDays(1)))? "selected" : "")"
+                                            @onclick="() => SetSingleReminderDate(reminder,DateOnly.FromDateTime(DateTime.Today.AddDays(1)))">
+                                    Morgen
                                     </button>
-                                    <button class="day-chip @(IsCustomDateSelection(reminder) ? "selected" : "")"
+
+                                    <button class="day-chip @(IsCustomDateSelection(reminder)? "selected" : "")"
                                             @onclick="() => OpenDaySelection(reminder)">
-                                        @Localizer["TaskAddReminderReminderMenuPickDay"]
-                                    </button>
-                                </div>
-                                <div class="reminder-card-footer">
-                                    <div class="reminder-menu-time-picker" @onclick="() => EditReminderTime(reminder)">
-                                        <img src="clock.svg" width="24" alt="Uhrzeit" />
-                                        <input type="time" class="time-picker-input" @bind-value="tempTime" @bind-value:after="SaveTimeAsync" placeholder="@reminder.FormattedTime" />
-                                    </div>
-                                    <button class="reminder-delete-btn" @onclick="() => RemoveReminder(reminder)">
-                                        <img src="red-trash.svg" width="18" alt="Löschen" />
+                                        Tag wählen
                                     </button>
                                 </div>
                             </div>
@@ -170,14 +161,24 @@
 
                         <button class="add-reminder-btn" @onclick="AddNewReminder">
                             <img src="plus.svg" width="18" alt="Plus" />
-                            <span>@Localizer["TaskAddReminderAddReminderButton"]</span>
+                            <span>Erinnerung hinzufügen</span>
                         </button>
+                    }
+                    else
+                    {
+                        <div class="notification-permission-card">
+                            <p>Benachrichtigungen sind zurzeit deaktiviert.</p>
+                            <button class="ask-permission-button" @onclick="RequestNotificationPermission">
+                                Benachrichtigungen erlauben
+                            </button>
+                        </div>
+                    }
                 </div>
 
                 <div class="sheet-footer">
                     <button class="save-btn-full" @onclick="ToggleReminderMenuAsync">
                         <img src="check.svg" alt="Fertig" />
-                        <span>@Localizer["TaskAddReminderDoneButton"]</span>
+                        <span>Fertig</span>
                     </button>
                 </div>
             </div>
@@ -244,9 +245,9 @@
                         }
 
                         <!-- Eigentliche Tage -->
-                        @for (int d = 1; d <= DateTime.DaysInMonth(calendarDisplayDate.Year, calendarDisplayDate.Month); d++)
+                        @for (int d = 1;d <= DateTime.DaysInMonth(calendarDisplayDate.Year, calendarDisplayDate.Month);d++)
                         {
-                            var date = new DateOnly(calendarDisplayDate.Year, calendarDisplayDate.Month, d);
+                            var date = new DateOnly(calendarDisplayDate.Year, calendarDisplayDate.Month,d);
 
                             bool isSelected = selectedDatesDraft.Contains(date);
 
@@ -289,7 +290,6 @@
     private List<DateOnly> selectedDatesDraft = new();
     private bool isDaySelectionClosing = false;
     private DateTime calendarDisplayDate = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
-    private bool isReminderModalClosing = false;
 
     // Animation & UI States
     private bool isClosing = false;
@@ -334,7 +334,7 @@
     // Navigation & Bearbeitung
     // ==========================================
 
-    private void GoBack() => Navigation.NavigateTo("/");
+    private void GoBack() => Navigation.NavigateTo("");
 
     private void OpenEditModal()
     {
@@ -381,6 +381,7 @@
         task.Description = editTask.Description;
         task.Reminders = editTask.Reminders;
 
+        await ScheduleNotificationsForTaskAsync(task);
         await TaskStorage.SaveTasksAsync(tasks);
 
         await CloseEditModalAsync();
@@ -393,12 +394,11 @@
             return;
         }
 
-
         tasks.Remove(task);
 
         await TaskStorage.SaveTasksAsync(tasks);
 
-        Navigation.NavigateTo("/");
+        Navigation.NavigateTo("");
     }
 
     // ==========================================
@@ -448,7 +448,7 @@
 
     private Task CloseTimePickerAsync() => AnimateCloseAsync(() => selectedReminder = null);
 
-    private bool IsSingleDateSelected(Reminder reminder, DateOnly date)
+    private bool IsSingleDateSelected(Reminder reminder,DateOnly date)
     {
         return reminder.Dates.Count == 1 && reminder.Dates.Contains(date);
     }
@@ -496,6 +496,14 @@
         isDaySelectionClosing = false;
     }
 
+    // ==========================================
+    // Benachrichtigungen
+    // ==========================================
+
+    private async Task RequestNotificationPermission()
+    {
+        StateHasChanged();
+    }
 
     // ==========================================
     // Datum Wähler Kalender
@@ -539,6 +547,39 @@
         }
 
         return date.ToString("dd.MM.yyyy");
+    }
+
+    private async Task ScheduleNotificationsForTaskAsync(TodoTask task)
+    {
+        if (task.NotificationIds.Any())
+        {
+
+            task.NotificationIds.Clear();
+        }
+
+        if (task.IsCompleted || !notificationsEnabled)
+        {
+            return;
+        }
+
+        foreach (Reminder reminder in task.Reminders)
+        {
+            foreach (DateOnly date in reminder.Dates)
+            {
+                DateTime notifyTime = date.ToDateTime(reminder.Time);
+
+                // Keine Benachrichtigung mehr für vergangene Termine.
+                if (notifyTime <= DateTime.Now)
+                {
+                    continue;
+                }
+
+                int notificationId = CreateUniqueNotificationId();
+
+                task.NotificationIds.Add(notificationId);
+
+            }
+        }
     }
 
     private int CreateUniqueNotificationId()
